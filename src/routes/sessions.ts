@@ -4,6 +4,7 @@ import { requireAuth, type AuthVariables } from "../auth/middleware.js";
 import type { AppConfig } from "../config.js";
 import type { Db } from "../db/client.js";
 import { credentials, harnessSessions } from "../db/schema.js";
+import type { SseHub } from "../gateway/sse.js";
 
 /** 会话标题长度上限。 */
 const MAX_TITLE_LENGTH = 200;
@@ -40,7 +41,7 @@ function parseFeatures(value: unknown): SessionFeatures | null {
 }
 
 /** 会话管理路由：创建、列表、删除；所有操作按当前用户隔离。 */
-export function createSessionRoutes(deps: { db: Db; config: AppConfig }) {
+export function createSessionRoutes(deps: { db: Db; config: AppConfig; hub: SseHub }) {
   const app = new Hono<{ Variables: AuthVariables }>();
   const auth = requireAuth(deps.config.jwtSecret);
 
@@ -132,6 +133,8 @@ export function createSessionRoutes(deps: { db: Db; config: AppConfig }) {
     if (deleted.length === 0) {
       return c.json({ error: "not found" }, 404);
     }
+    // 关闭该会话的活跃 SSE 连接并清理内存状态，避免空桶常驻。
+    deps.hub.dispose(id);
     return c.body(null, 204);
   });
 
