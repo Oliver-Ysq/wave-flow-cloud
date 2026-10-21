@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX "credentials_user_id_unique" ON "credentials" USING btree ("user_id");

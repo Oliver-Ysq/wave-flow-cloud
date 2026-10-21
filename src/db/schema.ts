@@ -22,21 +22,25 @@ export const users = pgTable(
   (t) => [uniqueIndex("users_github_id_unique").on(t.githubId)],
 );
 
-export const credentials = pgTable("credentials", {
-  /** 内部主键，UUID v4。 */
-  id: uuid("id").primaryKey().defaultRandom(),
-  /** 属主用户；删除用户级联删除其凭据。 */
-  userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
-  /** AES-256-GCM 密文，主密钥在 env（MASTER_KEY），服务端永不回显明文。 */
-  ciphertext: text("ciphertext").notNull(),
-  /** 随机初始化向量，随密文一起存表；同一明文+同一密钥不产出同一密文。 */
-  iv: text("iv").notNull(),
-  /** GCM 完整性校验标签，防密文篡改。 */
-  authTag: text("auth_tag").notNull(),
-  createdAt: timestamp("created_at", { withTimezone: true, mode: "string" }).notNull().defaultNow(),
-  /** 最近一次被模型调用使用的时间，可空（保存后可能从未使用）。 */
-  lastUsedAt: timestamp("last_used_at", { withTimezone: true, mode: "string" }),
-});
+export const credentials = pgTable(
+  "credentials",
+  {
+    /** 内部主键，UUID v4。 */
+    id: uuid("id").primaryKey().defaultRandom(),
+    /** 属主用户；删除用户级联删除其凭据。唯一索引保证每用户最多一条。 */
+    userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+    /** AES-256-GCM 密文，主密钥在 env（MASTER_KEY），服务端永不回显明文。 */
+    ciphertext: text("ciphertext").notNull(),
+    /** 随机初始化向量，随密文一起存表；同一明文+同一密钥不产出同一密文。 */
+    iv: text("iv").notNull(),
+    /** GCM 完整性校验标签，防密文篡改。 */
+    authTag: text("auth_tag").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "string" }).notNull().defaultNow(),
+    /** 最近一次被模型调用使用的时间，可空（保存后可能从未使用）。 */
+    lastUsedAt: timestamp("last_used_at", { withTimezone: true, mode: "string" }),
+  },
+  (t) => [uniqueIndex("credentials_user_id_unique").on(t.userId)],
+);
 
 export const harnessSessions = pgTable("harness_sessions", {
   /** 会话 ID，客户端凭它建立 SSE 与上行 POST。 */

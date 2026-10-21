@@ -51,6 +51,11 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
     throw new Error("启动失败：JWT_SECRET 必须是 64 位 hex（32 字节，生成：openssl rand -hex 32）");
   }
 
+  const masterKey = env.MASTER_KEY!.trim();
+  if (!/^[0-9a-f]{64}$/i.test(masterKey)) {
+    throw new Error("启动失败：MASTER_KEY 必须是 64 位 hex（32 字节，生成：openssl rand -hex 32）");
+  }
+
   return {
     port,
     databaseUrl: env.DATABASE_URL!.trim(),
@@ -58,6 +63,6 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
     githubClientSecret: env.GITHUB_CLIENT_SECRET!.trim(),
     githubRedirectUrl: env.GITHUB_REDIRECT_URL!.trim(),
     jwtSecret,
-    masterKey: env.MASTER_KEY!.trim(),
+    masterKey,
   };
 }
