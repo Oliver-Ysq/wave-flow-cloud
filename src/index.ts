@@ -1,8 +1,12 @@
 import { serve } from "@hono/node-server";
 import { Hono } from "hono";
 import { loadConfig } from "./config.js";
+import { createDb, runMigrations } from "./db/client.js";
 
 const config = loadConfig();
+
+const db = createDb(config.databaseUrl);
+await runMigrations(db);
 
 const app = new Hono();
 

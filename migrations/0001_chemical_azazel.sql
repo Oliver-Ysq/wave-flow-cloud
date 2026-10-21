@@ -1,0 +1,1 @@
+ALTER TABLE "harness_sessions" ADD COLUMN "features" jsonb;

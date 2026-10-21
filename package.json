@@ -10,14 +10,20 @@
     "dev": "tsx watch --env-file=.env src/index.ts",
     "build": "tsc",
     "start": "node --env-file=.env dist/index.js",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "db:generate": "drizzle-kit generate",
+    "db:up": "docker compose up -d postgres"
   },
   "dependencies": {
     "@hono/node-server": "^2.1.5",
-    "hono": "^4.13.13"
+    "drizzle-orm": "^0.45.4",
+    "hono": "^4.13.13",
+    "pg": "^8.23.1"
   },
   "devDependencies": {
     "@types/node": "^26.6.5",
+    "@types/pg": "^8.23.1",
+    "drizzle-kit": "^0.31.11",
     "tsx": "^4.23.15",
     "typescript": "^7.0.2"
   }
